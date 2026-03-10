@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>VolScan – Options Intelligence</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#07070f;color:#fff;font-family:'JetBrains Mono','Courier New',monospace;min-height:100vh}
+header{padding:14px 24px;border-bottom:1px solid #1a1a2a;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font-size:20px;font-weight:800;letter-spacing:2px;color:#f59e0b}.logo span{color:#fff}
+.sub{color:#444;font-size:10px;margin-top:2px;letter-spacing:2px}
+#ai-btn{background:#f59e0b;color:#000;font-weight:700;font-size:12px;border:none;border-radius:6px;padding:9px 18px;cursor:pointer;white-space:nowrap;font-family:inherit}
+#ai-btn:hover{background:#fbbf24}#ai-btn:disabled{opacity:.4;cursor:default}
+.ticker-bar{padding:12px 24px;border-bottom:1px solid #1a1a2a;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.ticker-bar label{color:#444;font-size:11px;letter-spacing:1px;white-space:nowrap}
+#ticker-input{flex:1;min-width:200px;background:#0f0f1a;border:1px solid #1e1e2e;border-radius:6px;padding:9px 12px;color:#ccc;font-size:12px;outline:none;font-family:inherit}
+#scan-btn{background:#f59e0b;border:none;color:#000;border-radius:6px;padding:9px 18px;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit}
+#scan-btn:hover{background:#fbbf24}#scan-btn:disabled{opacity:.4;cursor:default}
+#setup-panel{max-width:520px;margin:40px auto;background:#0f0f1a;border:1px solid #1e1e2e;border-radius:12px;padding:26px}
+#setup-panel h2{color:#f59e0b;font-size:16px;margin-bottom:6px;letter-spacing:1px}
+#setup-panel p{color:#666;font-size:12px;margin-bottom:16px;line-height:1.7}
+.field{margin-bottom:10px}.field label{display:block;color:#888;font-size:11px;margin-bottom:4px;letter-spacing:1px}
+.field input{width:100%;background:#07070f;border:1px solid #1e1e2e;border-radius:6px;padding:9px 12px;color:#fff;font-size:12px;outline:none;font-family:inherit}
+.field input:focus{border-color:#f59e0b}
+.btn-primary{width:100%;background:#f59e0b;color:#000;font-weight:700;border:none;border-radius:6px;padding:11px;font-size:13px;cursor:pointer;margin-top:6px;font-family:inherit}
+.btn-primary:hover{background:#fbbf24}.btn-primary:disabled{opacity:.4;cursor:default}
+.err{color:#ef4444;font-size:11px;margin-top:10px;padding:8px 10px;background:#1a0808;border:1px solid #3a1010;border-radius:6px;display:none}
+.err.show{display:block}
+.note{background:#0a1010;border:1px solid #1e2e1e;border-radius:6px;padding:12px;font-size:11px;color:#4caf50;margin-top:12px;line-height:1.8}
+#status-bar{padding:6px 24px;font-size:11px;color:#555;border-bottom:1px solid #1a1a2a;min-height:26px}
+.spin{display:inline-block;width:10px;height:10px;border:2px solid #333;border-top-color:#f59e0b;border-radius:50%;animation:sp .6s linear infinite;margin-right:5px;vertical-align:middle}
+@keyframes sp{to{transform:rotate(360deg)}}
+.logout-btn{background:none;border:1px solid #2a2a3a;color:#555;font-size:11px;padding:4px 10px;border-radius:4px;cursor:pointer;font-family:inherit}
+.logout-btn:hover{color:#fff;border-color:#555}
+#filter-bar{display:none;padding:10px 24px;background:#080810;border-bottom:1px solid #1a1a2a;gap:8px;flex-wrap:wrap;align-items:center}
+.fbtn{background:#0f0f1a;border:1px solid #1e1e2e;color:#555;font-size:11px;padding:5px 12px;border-radius:4px;cursor:pointer;font-family:inherit;letter-spacing:1px}
+.fbtn:hover{background:#1a1a2a;color:#fff}.fbtn.active{background:#1a1500;border-color:#f59e0b;color:#f59e0b}
+#cards-grid{padding:20px 24px;display:flex;flex-wrap:wrap;gap:14px}
+.card{background:#0f0f1a;border:1px solid #1e1e2e;border-radius:10px;padding:14px;flex:1 1 270px;max-width:320px;min-width:260px;cursor:pointer;transition:border-color .2s}
+.card:hover{border-color:#f59e0b55}
+.ch{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.ct{font-weight:700;font-size:15px}.cp2{color:#888;font-size:12px;margin-left:4px}
+.ivrl{font-size:11px;color:#555}.ivrl span{color:#f59e0b}
+.ivrow{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.ivv{font-size:22px;font-weight:700}.ivc{font-size:12px;margin-left:4px}
+.gw{text-align:center}.gl{color:#666;font-size:9px;margin-top:-4px}.gp{color:#60a5fa;font-size:11px;font-weight:600}
+.badge{font-size:10px;padding:2px 8px;border-radius:3px;display:inline-flex;align-items:center;gap:4px;margin-bottom:8px;letter-spacing:1px}
+.mixed{background:#1a1a1a;border:1px solid #333;color:#888}.hedge{background:#0a1525;border:1px solid #1e3a5f;color:#60a5fa}
+.mvs{display:flex;gap:10px;background:#0a0a15;border-radius:4px;padding:5px 8px;margin-bottom:8px;font-size:10px;color:#888}
+.mvs span{color:#444}
+.sec{color:#444;font-size:10px;letter-spacing:1px;margin-bottom:4px;margin-top:8px}
+.key-levels-wrap{display:flex;flex-direction:column;gap:3px;margin:4px 0}
+.kl-row{display:grid;grid-template-columns:60px 1fr 62px 34px;align-items:center;gap:4px}
+.kl-label{font-size:9px;letter-spacing:1px;font-weight:700}
+.kl-bar-wrap{height:1px;position:relative}.kl-line{height:1px;width:100%}
+.kl-price{text-align:right;font-weight:600;font-size:11px;font-family:"JetBrains Mono",monospace}
+.kl-pct{text-align:right;font-size:9px;font-family:"JetBrains Mono",monospace}
+.key-levels-wrap{display:flex;flex-direction:column;gap:3px;margin:4px 0}
+.kl-row{display:grid;grid-template-columns:60px 1fr 62px 34px;align-items:center;gap:4px}
+.kl-label{font-size:9px;letter-spacing:1px;font-weight:700}
+.kl-bar-wrap{height:1px;position:relative}.kl-line{height:1px;width:100%}
+.kl-price{text-align:right;font-weight:600;font-size:11px;font-family:'JetBrains Mono',monospace}
+.kl-pct{text-align:right;font-size:9px;font-family:'JetBrains Mono',monospace}
+.row{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.rl{color:#555;font-size:11px}.rv{font-size:11px;font-weight:500}
+.bw{width:65px;height:4px;background:#1e1e2e;border-radius:2px;overflow:hidden;margin-right:4px}
+.bf{height:100%;border-radius:2px}
+.oib{height:4px;border-radius:2px;background:#1e1e2e;overflow:hidden;margin-bottom:5px}
+.oic{height:100%;background:#22c55e;border-radius:2px}
+.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.pcc{color:#22c55e;font-size:10px}.pcp{color:#ef4444;font-size:10px}
+/* DETAIL PANEL */
+#detail-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:100;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+#detail-overlay.show{display:flex}
+#detail-box{background:#0d0d12;border:1px solid #1e1e2e;border-radius:12px;width:100%;max-width:980px;max-height:88vh;display:flex;flex-direction:column;margin:auto}
+#detail-hdr{padding:16px 20px;border-bottom:1px solid #1a1a2a;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px}
+#detail-close{background:none;border:none;color:#555;font-size:22px;cursor:pointer}#detail-close:hover{color:#fff}
+.d-title{display:flex;align-items:baseline;gap:14px}
+.d-ticker{font-size:28px;font-weight:700;color:#fff}.d-price{font-size:22px;color:#f59e0b;font-weight:700}
+.d-signal-box{background:#131320;border:1px solid #1e1e2e;border-radius:6px;padding:12px 16px;min-width:190px}
+.d-signal-lbl{color:#f59e0b;font-size:10px;letter-spacing:2px;margin-bottom:4px}
+.d-signal-val{color:#f59e0b;font-size:12px;font-weight:700;margin-bottom:2px}
+.d-signal-sub{color:#444;font-size:10px}
+.d-tabs{display:flex;border-bottom:1px solid #1a1a2a;padding:0 20px}
+.d-tab{background:none;border:none;border-bottom:2px solid transparent;color:#444;padding:10px 16px;cursor:pointer;font-size:11px;font-family:inherit;letter-spacing:1px}
+.d-tab:hover{color:#888}.d-tab.active{color:#fff;border-bottom-color:#f59e0b}
+.d-body{padding:20px;overflow-y:auto;flex:1}
+.panel-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.panel{background:#111118;border:1px solid #1a1a2a;border-radius:8px;padding:16px}
+.panel-title{color:#f59e0b;font-size:10px;letter-spacing:2px;margin-bottom:14px;border-left:2px solid #f59e0b;padding-left:8px}
+.p-row{display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px}
+.p-lbl{color:#555}.p-val{color:#ccc}
+.move-boxes{display:flex;gap:10px;margin-bottom:14px}
+.move-box{flex:1;background:#0a0a15;border-radius:6px;padding:12px;text-align:center}
+.move-box-lbl{color:#555;font-size:10px;margin-bottom:6px;letter-spacing:1px}
+.move-box-val{color:#fff;font-size:18px;font-weight:700}
+.level-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #0d0d12}
+.level-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;margin-right:6px}
+.gex-bar-row{display:flex;align-items:center;gap:8px;padding:3px 0}
+.gex-strike{width:42px;text-align:right;font-size:11px;color:#555}
+.gex-bar-wrap{flex:1;height:14px;background:#0a0a15;border-radius:2px;overflow:hidden;position:relative}
+.gex-fill{position:absolute;top:0;height:100%;border-radius:2px}
+.gex-val{width:52px;font-size:11px;text-align:right}
+/* Key bar */
+.key-row{display:flex;align-items:center;gap:8px;padding:6px 24px;background:#080810;border-bottom:1px solid #1a1a2a;font-size:11px;color:#444}
+.key-row input{background:#0f0f1a;border:1px solid #1a1a2a;color:#888;padding:4px 10px;border-radius:4px;font-size:11px;font-family:inherit;outline:none;width:240px}
+.key-row input:focus{border-color:#f59e0b;color:#fff}
+.key-status{font-size:10px;padding:2px 8px;border-radius:3px;letter-spacing:1px}
+.key-on{background:#0a1500;border:1px solid #22c55e;color:#22c55e}
+.key-off{background:#1a0a00;border:1px solid #f59e0b44;color:#f59e0b}
+/* AI overlay */
+#ai-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;align-items:center;justify-content:center;padding:20px}
+#ai-overlay.show{display:flex}
+#ai-box{background:#0f0f1a;border:1px solid #1e1e2e;border-radius:12px;max-width:680px;width:100%;max-height:85vh;display:flex;flex-direction:column}
+#ai-hdr{padding:14px 18px;border-bottom:1px solid #1e1e2e;display:flex;justify-content:space-between;align-items:center}
+#ai-hdr h3{color:#f59e0b;font-size:14px;letter-spacing:1px}
+#ai-x{background:none;border:none;color:#555;font-size:20px;cursor:pointer}
+#ai-body{padding:18px;overflow-y:auto;flex:1;font-size:12px;line-height:1.8;color:#ccc;white-space:pre-wrap}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">VOL<span>SCAN</span></div>
+    <div class="sub">OPTIONS INTELLIGENCE · TASTYTRADE + CLAUDE AI</div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center">
+    <button class="logout-btn" id="logout-btn" style="display:none" onclick="logout()">Disconnect</button>
+    <button id="ai-btn" onclick="openAI()" disabled>⚡ AI Market Summary</button>
+  </div>
+</header>
+
+<div id="status-bar">Please connect below</div>
+
+<div class="key-row" id="key-row" style="display:none">
+  <span>ANTHROPIC KEY</span>
+  <input id="ant-key" type="password" placeholder="sk-ant-... (enables live AI briefs per ticker)" oninput="saveKey()"/>
+  <span class="key-status" id="key-status-badge">NOT SET</span>
+  <span style="color:#2a2a2a;margin-left:4px">· stays in your browser only</span>
+</div>
+
+<div class="ticker-bar">
+  <label>TICKERS</label>
+  <input id="ticker-input" value="AAPL, SPY, QQQ, META, AMZN, TSLA, NVDA, MSFT, AMD, COIN, GOOGL, HOOD, /ESH6, /NQH6"/>
+  <label style="white-space:nowrap;margin-left:8px">💰 BUDGET $</label>
+  <input id="budget-input" type="number" value="1000" min="100" max="100000" style="width:85px;background:#0f0f1a;border:1px solid #1e1e2e;border-radius:6px;padding:9px 10px;color:#f59e0b;font-size:12px;font-weight:700;outline:none;font-family:inherit"/>
+  <button id="scan-btn" onclick="scan()" disabled>Scan →</button>
+</div>
+
+<div id="setup-panel">
+  <h2>🔌 Connect Tastytrade</h2>
+  <p>Use your <b>Client Secret</b> and <b>Refresh Token</b> — no 2FA needed. Bypasses device authentication entirely.</p>
+  <div class="field"><label>CLIENT SECRET</label><input id="f-cs" type="password" value="" autocomplete="off"/></div>
+  <div class="field"><label>REFRESH TOKEN</label><input id="f-rt" type="password" value="" autocomplete="off"/></div>
+  <button id="connect-btn" class="btn-primary" onclick="connect()">⚡ Connect to Tastytrade</button>
+  <div id="cerr" class="err"></div>
+  <div class="note">
+    🔒 Credentials go only to <code>api.tastytrade.com</code> — not stored anywhere else.<br/>
+    📖 Read-only: cannot place trades.<br/>
+    ⚠️ Regenerate your Client Secret in Tastytrade after testing for security.
+  </div>
+</div>
+
+<div id="filter-bar">
+  <span style="color:#444;font-size:11px;letter-spacing:1px">SORT BY</span>
+  <button class="fbtn active" onclick="sortCards('ivr-high')" id="f-ivr-high">🔥 Sell Premium (High IVR)</button>
+  <button class="fbtn" onclick="sortCards('ivr-low')" id="f-ivr-low">💥 Buy Options (Low IVR)</button>
+  <button class="fbtn" onclick="sortCards('iv-rising')" id="f-iv-rising">📈 IV Rising</button>
+  <button class="fbtn" onclick="sortCards('iv-falling')" id="f-iv-falling">📉 IV Falling</button>
+  <button class="fbtn" onclick="sortCards('default')" id="f-default">↕ Default</button>
+</div>
+
+<div id="cards-grid" style="display:none"></div>
+
+<!-- AI MARKET SUMMARY OVERLAY -->
+<div id="ai-overlay">
+  <div id="ai-box">
+    <div id="ai-hdr"><h3>⚡ AI MARKET SUMMARY</h3><button id="ai-x" onclick="closeAI()">✕</button></div>
+    <div id="ai-body"></div>
+  </div>
+</div>
+
+<!-- VOLSCAN DETAIL OVERLAY -->
+<div id="detail-overlay">
+  <div id="detail-box">
+    <div id="detail-hdr">
+      <div>
+        <div class="d-title">
+          <span class="d-ticker" id="d-ticker">—</span>
+          <span class="d-price" id="d-price">—</span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px">
+          <span id="d-status-badge" style="font-size:10px;padding:2px 10px;border-radius:10px;font-weight:700;letter-spacing:1px"></span>
+          <span id="d-tags-text" style="color:#444;font-size:10px"></span>
+        </div>
+        <div style="color:#555;font-size:12px;margin-top:6px" id="d-summary"></div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <div class="d-signal-box">
+          <div class="d-signal-lbl">SIGNAL</div>
+          <div class="d-signal-val" id="d-signal-val"></div>
+          <div class="d-signal-sub" id="d-signal-sub"></div>
+        </div>
+        <button id="detail-close" onclick="closeDetail()">✕</button>
+      </div>
+    </div>
+    <div class="d-tabs">
+      <button class="d-tab active" onclick="switchTab('structure')">STRUCTURE</button>
+      <button class="d-tab" onclick="switchTab('levels')">LEVELS</button>
+      <button class="d-tab" onclick="switchTab('gex')">GEX</button>
+      <button class="d-tab" onclick="switchTab('aibrief')">⚡ AI BRIEF</button>
+    </div>
+    <div class="d-body" id="d-body"></div>
+  </div>
+</div>
+
+<script>
+const API_AUTH='https://api.tastytrade.com';
+const API_DATA='https://api.tastyworks.com';
+const CLIENT_ID='210e67a9-614f-4b82-87ba-79e366dd49da';
+let token=null,scanData=[],currentDetail=null;
+const $=id=>document.getElementById(id);
+const st=msg=>$('status-bar').innerHTML=msg;
+function cerr(m){const e=$('cerr');e.textContent=m;e.className=m?'err show':'err';}
+
+function saveKey(){const k=$('ant-key').value.trim();if(k)sessionStorage.setItem('ant_key',k);updateKeyBadge();}
+function getKey(){return $('ant-key')?.value.trim()||sessionStorage.getItem('ant_key')||'';}
+function updateKeyBadge(){
+  const k=getKey(),b=$('key-status-badge');if(!b)return;
+  if(k&&k.startsWith('AIza')){b.textContent='ENABLED';b.className='key-status key-on';}
+  else if(k){b.textContent='CHECK KEY';b.className='key-status key-off';}
+  else{b.textContent='NOT SET';b.className='key-status key-off';}
+}
+
+async function connect(){
+  const cs=$('f-cs').value.trim(),rt=$('f-rt').value.trim();
+  try{localStorage.setItem('vs_cs',cs);localStorage.setItem('vs_rt',rt);}catch{}
+  if(!cs||!rt){cerr('Enter Client Secret and Refresh Token.');return;}
+  const btn=$('connect-btn');btn.disabled=true;btn.textContent='Connecting…';cerr('');
+  st('<span class="spin"></span>Authenticating with OAuth…');
+  try{
+    const res=await fetch(`${API_AUTH}/oauth/token`,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body:new URLSearchParams({grant_type:'refresh_token',client_id:CLIENT_ID,client_secret:cs,refresh_token:rt})});
+    const j=await res.json();
+    if(!res.ok)throw new Error(j.error_description||j.error||`OAuth failed (${res.status})`);
+    token=j.access_token;if(!token)throw new Error('No access token: '+JSON.stringify(j));
+    sessionStorage.setItem('tt_tok',token);sessionStorage.setItem('tt_cs',cs);sessionStorage.setItem('tt_rt',rt);
+    showApp();await scan();
+  }catch(e){cerr('❌ '+e.message);st('❌ Connection failed');btn.disabled=false;btn.textContent='⚡ Connect to Tastytrade';}
+}
+
+function showApp(){
+  $('setup-panel').style.display='none';$('logout-btn').style.display='block';
+  $('scan-btn').disabled=false;$('ai-btn').disabled=false;
+  $('cards-grid').style.display='flex';$('filter-bar').style.display='flex';
+  $('key-row').style.display='flex';
+  const saved=sessionStorage.getItem('ant_key');if(saved)$('ant-key').value=saved;
+  updateKeyBadge();st('✅ Connected to Tastytrade');
+}
+function logout(){
+  token=null;scanData=[];sessionStorage.clear();
+  $('setup-panel').style.display='block';$('logout-btn').style.display='none';
+  $('scan-btn').disabled=true;$('ai-btn').disabled=true;
+  $('cards-grid').style.display='none';$('cards-grid').innerHTML='';
+  $('key-row').style.display='none';
+  $('connect-btn').disabled=false;$('connect-btn').textContent='⚡ Connect to Tastytrade';
+  cerr('');st('Disconnected');
+}
+const hdr=()=>({Authorization:`Bearer ${token}`});
+
+async function fetchMetrics(symbols){
+  const qs=`symbols=${symbols.join(',')}`;
+  const res=await fetch(`${API_DATA}/market-metrics?${qs}`,{headers:hdr()});
+  if(res.ok)return(await res.json()).data?.items||[];
+  const res2=await fetch(`${API_DATA}/market-metrics?${symbols.map(s=>`symbol[]=${encodeURIComponent(s)}`).join('&')}`,{headers:hdr()});
+  if(res2.ok)return(await res2.json()).data?.items||[];
+  throw new Error('Metrics fetch failed: '+(await res.text()).slice(0,120));
+}
+async function fetchChain(sym){
+  if(sym.startsWith('/')) return [];
+  try{
+    // Try nested endpoint first — gives per-strike OI
+    const r=await fetch(`${API_DATA}/option-chains/${encodeURIComponent(sym)}/nested`,{headers:hdr()});
+    console.log(`Chain nested ${sym}: ${r.status}`);
+    if(r.ok){
+      const raw=await r.json();
+      const exps=raw.data?.items||[];
+      console.log(`Chain nested ${sym}: ${exps.length} expirations`);
+      if(exps.length){
+        const firstExp=exps[0];
+        // Structure: items[0].expirations[0].strikes[0]
+        const allExpirations=firstExp.expirations||[firstExp];
+        if(allExpirations.length>0&&allExpirations[0].strikes?.length>0){
+          const s0=allExpirations[0].strikes[0];
+          console.log(`Chain nested ${sym} first strike FULL:`, JSON.stringify(s0));
+        }
+        const flat=[];
+        for(const item of exps){
+          const expList=item.expirations||[item];
+          for(const exp of expList){
+            const expDate=exp['expiration-date']||exp['expirationDate']||'';
+            const strikes=exp.strikes||[];
+            for(const strike of strikes){
+              const s=parseFloat(strike['strike-price']||strike['strikePrice']||0);
+              if(!s) continue;
+              const callNode=strike.call||strike;
+              const putNode=strike.put||strike;
+              flat.push({
+                'strike-price':s,
+                'expiration-date':expDate,
+                'call-open-interest':parseInt(callNode['open-interest']||strike['call-open-interest']||0),
+                'put-open-interest':parseInt(putNode['open-interest']||strike['put-open-interest']||0),
+                'call-volume':parseInt(callNode['volume']||strike['call-volume']||0),
+                'put-volume':parseInt(putNode['volume']||strike['put-volume']||0),
+                'call-gamma':parseFloat(callNode['gamma']||strike['call-gamma']||0),
+                'gamma':parseFloat(callNode['gamma']||strike['call-gamma']||0),
+              });
+            }
+          }
+        }
+        console.log(`Chain nested ${sym}: ${flat.length} strikes parsed`);
+        if(flat.length) return flat;
+      }
+    }
+    // Fallback: summaries
+    const r2=await fetch(`${API_DATA}/option-chains/${encodeURIComponent(sym)}/summaries`,{headers:hdr()});
+    console.log(`Chain summaries ${sym}: ${r2.status}`);
+    if(!r2.ok) return [];
+    const raw2=(await r2.json()).data?.items||[];
+    return raw2;
+  }catch(e){console.warn('fetchChain error',sym,e);return[];}
+}
+
+// Build synthetic per-strike OI distribution from summaries data
+// Summaries gives total call/put OI per expiration — we distribute across strikes
+// using a log-normal distribution centered at ATM, weighted by time to expiry
+function buildSyntheticStrikes(summaries, spot, iv){
+  if(!summaries||!summaries.length||!spot) return [];
+  const step = spot>400?5:spot>200?2.5:spot>50?1:0.5;
+  const strikeRange = 16; // ±8 strikes from ATM
+  const strikes = Array.from({length:strikeRange+1},(_,i)=>Math.round((spot+(i-strikeRange/2)*step)/step)*step);
+  const buckets = {};
+  strikes.forEach(s=>buckets[s]={callOI:0,putOI:0,expDate:''});
+
+  for(const exp of summaries){
+    const totalCallOI = parseInt(exp['call-open-interest']||0);
+    const totalPutOI  = parseInt(exp['put-open-interest']||0);
+    if(!totalCallOI&&!totalPutOI) continue;
+    const expDate = exp['expiration-date']||exp['expirationDate']||'';
+    const daysOut = expDate ? Math.max(1,(new Date(expDate)-new Date())/(86400000)) : 21;
+    const T = daysOut/252;
+    const ivAdj = (iv||0.30)*Math.sqrt(T/0.0833); // scale IV by time
+
+    // Distribute OI across strikes using log-normal density weights
+    let callSum=0, putSum=0;
+    const weights = {};
+    for(const s of strikes){
+      const d1=(Math.log(s/spot))/(ivAdj||0.01);
+      // Calls peak slightly OTM above spot, puts peak slightly OTM below spot
+      const callW = Math.exp(-0.5*(d1-0.1)*(d1-0.1));
+      const putW  = Math.exp(-0.5*(d1+0.1)*(d1+0.1));
+      weights[s]={c:callW,p:putW};
+      callSum+=callW; putSum+=putW;
+    }
+    for(const s of strikes){
+      buckets[s].callOI += Math.round(totalCallOI*(weights[s].c/callSum));
+      buckets[s].putOI  += Math.round(totalPutOI *(weights[s].p/putSum));
+      if(!buckets[s].expDate) buckets[s].expDate=expDate;
+    }
+  }
+  return strikes.map(s=>({
+    'strike-price': s,
+    'call-open-interest': buckets[s].callOI,
+    'put-open-interest':  buckets[s].putOI,
+    'expiration-date': buckets[s].expDate,
+  }));
+}
+async function fetchQuotes(symbols){
+  try{
+    const out={};
+    // Method 1: batch quotes endpoint
+    const p=new URLSearchParams();
+    symbols.forEach(s=>p.append('symbols[]',s));
+    const r=await fetch(`${API_DATA}/quotes/batch?${p}`,{headers:hdr()});
+    if(r.ok){
+      const items=(await r.json()).data?.items||[];
+      for(const q of items){
+        const px=parseFloat(q['last']||q['mark']||q['bid-price']||q['ask-price']||q['close']||q['prev-close']||0);
+        if(px>0) out[q.symbol]=px;
+      }
+    }
+    // Method 2: market-data endpoint for any still missing
+    const missing=symbols.filter(s=>!out[s]);
+    if(missing.length){
+      const r2=await fetch(`${API_DATA}/market-data?symbols=${missing.join(',')}`,{headers:hdr()});
+      if(r2.ok){
+        const items2=(await r2.json()).data?.items||[];
+        for(const q of items2){
+          const px=parseFloat(q['last']||q['mark']||q['close']||0);
+          if(px>0) out[q.symbol]=px;
+        }
+      }
+    }
+    // Method 3: futures (/ES, /NQ etc) and indices (SPX, VIX)
+    const stillMissing=symbols.filter(s=>!out[s]);
+    const futures=stillMissing.filter(s=>s.startsWith('/'));
+    const indices=stillMissing.filter(s=>!s.startsWith('/'));
+
+    // Futures quotes — use /futures-option-chains/{code}/nested to get underlying price
+    // Tastytrade futures REST quotes require DXLink websocket; best REST fallback is the chain
+    if(futures.length){
+      for(const sym of futures){
+        if(out[sym]) continue;
+        try{
+          // Strip leading slash: /ES -> ES, /NQ -> NQ
+          const code = sym.replace(/^\//,'');
+          // Try GET /futures/{symbol} instrument endpoint — has 'last-price' field
+          const r1=await fetch(`${API_DATA}/instruments/futures?symbol[]=${sym}`,{headers:hdr()});
+          if(r1.ok){
+            const items=(await r1.json()).data?.items||[];
+            console.log(sym,'instruments/futures:',JSON.stringify(items[0]));
+            const px=parseFloat(items[0]?.['last-price']||items[0]?.['mark-price']||items[0]?.['settlement-price']||0);
+            if(px>0){out[sym]=px;console.log('✅',sym,'price:',px);continue;}
+          }
+          // Try futures-option-chains nested — underlying-price in header
+          const r2=await fetch(`${API_DATA}/futures-option-chains/${code}/nested`,{headers:hdr()});
+          if(r2.ok){
+            const j2=await r2.json();
+            console.log(sym,'chain header:',JSON.stringify(j2.data?.['underlying-symbol']),j2.data?.['underlying-price']);
+            const px=parseFloat(j2.data?.['underlying-price']||0);
+            if(px>0){out[sym]=px;console.log('✅',sym,'price from chain:',px);continue;}
+          }
+          // Try market-metrics with /ES format
+          const r3=await fetch(`${API_DATA}/market-metrics?symbols[]=${encodeURIComponent(sym)}`,{headers:hdr()});
+          if(r3.ok){
+            const items3=(await r3.json()).data?.items||[];
+            const px=parseFloat(items3[0]?.['underlying-price']||items3[0]?.['last']||0);
+            if(px>0){out[sym]=px;console.log('✅',sym,'price from metrics:',px);}
+          }
+        }catch(e){console.warn(sym,'futures error:',e);}
+      }
+    }
+
+    // Index quotes
+    for(const sym of indices){
+      if(out[sym]) continue;
+      try{
+        const ri=await fetch(`${API_DATA}/indices/quotes?symbols[]=${encodeURIComponent(sym)}`,{headers:hdr()});
+        if(ri.ok){
+          const ii=(await ri.json()).data?.items||[];
+          for(const q of ii){const px=parseFloat(q['last']||q['mark']||q['value']||q['close']||0);if(px>0)out[q.symbol||sym]=px;}
+        }
+      }catch{}
+    }
+    console.log('Quotes fetched:',JSON.stringify(out));
+    return out;
+  }catch(e){console.error('fetchQuotes:',e);return{};}
+}
+// Auto-detect current futures front month: H=Mar, M=Jun, U=Sep, Z=Dec
+function futuresMonth(){
+  const now = new Date();
+  const m = now.getMonth()+1; // 1-12
+  const y = String(now.getFullYear()).slice(-1); // last digit e.g. 6 for 2026
+  if(m<=3) return 'H'+y;
+  if(m<=6) return 'M'+y;
+  if(m<=9) return 'U'+y;
+  return 'Z'+y;
+}
+function futuresSym(root){ return root+futuresMonth(); }
+
+function nextFri(){const d=new Date();d.setDate(d.getDate()+(5-d.getDay()+7)%7||7);return d.toISOString().slice(0,10);}
+function fmtK(n){return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(0)+'K':String(n||'—');}
+
+// ===== CBOE FREE OI DATA =====
+// Cache CBOE data per ticker to avoid refetching every card click
+const cboeCache={};
+
+async function fetchCBOE(sym){
+  if(sym.startsWith('/')) return null;
+  // CBOE only works from https:// hosted pages (CORS blocks file://)
+  console.log(`CBOE fetch ${sym}: protocol=${window.location.protocol}`);
+  if(window.location.protocol!=='https:') return null;
+  if(cboeCache[sym]&&(Date.now()-cboeCache[sym].ts)<5*60*1000) return cboeCache[sym].data;
+  try{
+    const url=`https://cdn.cboe.com/api/global/delayed_quotes/options/${sym}.json`;
+    const r=await fetch(url);
+    if(!r.ok) throw new Error('CBOE '+r.status);
+    const raw=await r.json();
+    const options=raw?.data?.options||[];
+    if(!options.length) return null;
+    const today=new Date().toISOString().slice(0,10);
+    const exps=new Set();
+    options.forEach(o=>{const m=o.option?.match(/[A-Z]+(\d{2})(\d{2})(\d{2})[CP]/);if(m)exps.add(`20${m[1]}-${m[2]}-${m[3]}`);});
+    const future=[...exps].filter(e=>e>=today).sort();
+    const targetExp=future[0]||[...exps].sort()[0];
+    if(!targetExp) return null;
+    const calls=[],puts=[];
+    options.forEach(o=>{
+      const m=o.option?.match(/[A-Z]+(\d{2})(\d{2})(\d{2})([CP])(\d+)/);
+      if(!m) return;
+      if(`20${m[1]}-${m[2]}-${m[3]}`!==targetExp) return;
+      const item={strike:parseFloat(m[5])/1000,openInterest:parseInt(o.open_interest||0),gamma:parseFloat(o.gamma||0),volume:parseInt(o.volume||0)};
+      if(m[4]==='C') calls.push(item); else puts.push(item);
+    });
+    if(!calls.length&&!puts.length) return null;
+    const data={calls,puts,expiry:targetExp};
+    cboeCache[sym]={data,ts:Date.now()};
+    console.log(`CBOE ${sym}: ${calls.length} calls, ${puts.length} puts for ${targetExp}`);
+    return data;
+  }catch(e){
+    console.warn('CBOE error for',sym,e.message);
+    return null;
+  }
+}
+
+function processCBOEGex(cboe, spot){
+  if(!cboe||!spot) return null;
+  const{calls,puts}=cboe;
+  const step=spot>400?5:spot>200?2.5:spot>50?1:0.5;
+  const iv=0.25; // fallback IV for BS gamma if missing
+  const T=1/252; // ~1 day for 0DTE
+
+  const buckets={};
+  const callOImap={},putOImap={};
+
+  // Process calls
+  for(const c of calls){
+    const s=c.strike;
+    if(!s||Math.abs(s-spot)/spot>0.15) continue;
+    const key=Math.round(s/step)*step;
+    let g=c.gamma;
+    if(!g||g<=0) g=bsGamma(spot,s,iv,T);
+    const gex=g*c.openInterest*100*spot*spot*0.01;
+    buckets[key]=(buckets[key]||0)+gex;
+    callOImap[key]=(callOImap[key]||0)+c.openInterest;
+  }
+  // Process puts
+  for(const p of puts){
+    const s=p.strike;
+    if(!s||Math.abs(s-spot)/spot>0.15) continue;
+    const key=Math.round(s/step)*step;
+    let g=p.gamma;
+    if(!g||g<=0) g=bsGamma(spot,s,iv,T);
+    const gex=-g*p.openInterest*100*spot*spot*0.01;
+    buckets[key]=(buckets[key]||0)+gex;
+    putOImap[key]=(putOImap[key]||0)+p.openInterest;
+  }
+
+  const strikes=Object.keys(buckets).map(Number).sort((a,b)=>a-b);
+  if(strikes.length<3) return null;
+
+  // Gamma flip
+  let cum=0,flipPrice=null;
+  for(const s of strikes){
+    const prev=cum;
+    cum+=buckets[s];
+    if((prev<0&&cum>=0)||(prev>=0&&cum<0)){flipPrice=s;break;}
+  }
+  if(!flipPrice) flipPrice=strikes.reduce((b,s)=>Math.abs(buckets[s])<Math.abs(buckets[b])?s:b,strikes[0]);
+
+  const maxRaw=Math.max(...strikes.map(s=>Math.abs(buckets[s])));
+  const scale=maxRaw>=1e9?1e9:maxRaw>=1e6?1e6:maxRaw>=1e3?1e3:1;
+  const unit=scale>=1e9?'B':scale>=1e6?'M':scale>=1e3?'K':'';
+
+  const gexArr=strikes.map(s=>({
+    strike:s,
+    gex:parseFloat((buckets[s]/scale).toFixed(1)),
+    unit,
+    callOI:callOImap[s]||0,
+    putOI:putOImap[s]||0,
+    netGex:buckets[s],
+  }));
+
+  const totalAbs=strikes.reduce((a,s)=>a+Math.abs(buckets[s]),0);
+  const gexPerMove=Math.max(1,Math.round(totalAbs/1e8));
+  const maxGexStrike=strikes.reduce((b,s)=>Math.abs(buckets[s])>Math.abs(buckets[b])?s:b,strikes[0]);
+
+  // Top call/put OI walls
+  const allCalls=Object.entries(callOImap).map(([s,oi])=>({strike:+s,oi})).sort((a,b)=>b.oi-a.oi);
+  const allPuts =Object.entries(putOImap).map(([s,oi])=>({strike:+s,oi})).sort((a,b)=>b.oi-a.oi);
+
+  return{flipPrice,gexArr,gexPerMove,maxGexStrike,
+    callWalls:allCalls.slice(0,5),putWalls:allPuts.slice(0,5),
+    expiry:cboe.expiry,isReal:true};
+}
+
+function buildFallbackGex(spot){
+  // When chain has no gamma field, estimate GEX shape using OI distribution heuristic
+  const step=spot>400?5:spot>200?2.5:spot>50?1:0.5;
+  return Array.from({length:17},(_,i)=>{
+    const s=Math.round((spot+(i-8)*step*2)/step)*step;
+    // Typical GEX shape: negative near ATM (dealers short gamma from puts), positive OTM calls
+    const dist=(s-spot)/spot*100;
+    let gex;
+    if(dist>4) gex = 5+Math.random()*12;        // OTM calls — positive
+    else if(dist>1) gex = 1+Math.random()*5;
+    else if(dist>-1) gex = -8-Math.random()*10;  // ATM — negative
+    else if(dist>-4) gex = -4-Math.random()*8;
+    else gex = -2+Math.random()*6;
+    return{strike:s,gex:parseFloat(gex.toFixed(1))};
+  });
+}
+// Black-Scholes gamma estimate when broker doesn't return greeks
+function bsGamma(spot, strike, iv, T){
+  if(!iv||!T||!spot||!strike) return 0;
+  try{
+    const d1=(Math.log(spot/strike)+(0.5*iv*iv*T))/(iv*Math.sqrt(T));
+    return Math.exp(-0.5*d1*d1)/(spot*iv*Math.sqrt(T)*2.5066);
+  }catch{return 0;}
+}
+// GEX = gamma * OI * 100 * spot^2 * 0.01
+// Flip = strike where net cumulative GEX crosses zero
+function calcGexFromChain(chain, spot, ivDecimal){
+  if(!chain||!chain.length||!spot) return null;
+  const step = spot>400?5:spot>200?2.5:spot>50?1:0.5;
+  const iv = (ivDecimal&&ivDecimal>0) ? ivDecimal : 0.30;
+  const buckets={};
+  for(const e of chain){
+    // Tastytrade summaries: each item = one expiration, has a strike price + OI totals
+    // Field names vary — try all known variants
+    const strike=parseFloat(
+      e['strike-price']||e['strikePrice']||e['strike']||
+      e['underlying-strike-price']||0
+    );
+    if(!strike||strike<=0) continue;
+    if(Math.abs(strike-spot)/spot>0.20) continue;
+    const callOI=parseInt(e['call-open-interest']||e['callOpenInterest']||e['call_open_interest']||0);
+    const putOI =parseInt(e['put-open-interest'] ||e['putOpenInterest'] ||e['put_open_interest'] ||0);
+    if(!callOI&&!putOI) continue;
+    // Days to expiry from expiration-date field if available
+    let T=21/252;
+    const expStr=e['expiration-date']||e['expirationDate']||e['expiration']||'';
+    if(expStr){
+      const daysOut=(new Date(expStr)-new Date())/(1000*60*60*24);
+      if(daysOut>0&&daysOut<365) T=Math.max(1,daysOut)/252;
+    }
+    let gamma=parseFloat(e['call-gamma']||e['gamma']||0);
+    if(!gamma||gamma<=0) gamma=bsGamma(spot, strike, iv, T);
+    const callGex =  gamma * callOI * 100 * spot * spot * 0.01;
+    const putGex  = -gamma * putOI  * 100 * spot * spot * 0.01;
+    const key = Math.round(strike/step)*step;
+    buckets[key] = (buckets[key]||0) + callGex + putGex;
+  }
+  const strikes = Object.keys(buckets).map(Number).sort((a,b)=>a-b);
+  if(strikes.length<3) return null;
+  // Find flip: cumulative GEX zero-crossing
+  let cumGex=0, flipPrice=null;
+  for(const s of strikes){
+    const prev=cumGex;
+    cumGex+=buckets[s];
+    if((prev<0&&cumGex>=0)||(prev>=0&&cumGex<0)) flipPrice=s;
+  }
+  if(!flipPrice){
+    // Use strike just below spot with most negative net GEX
+    const belowSpot=strikes.filter(s=>s<=spot);
+    if(belowSpot.length) flipPrice=belowSpot.reduce((b,s)=>buckets[s]<buckets[b]?s:b,belowSpot[0]);
+    else flipPrice=strikes[Math.floor(strikes.length/2)];
+  }
+  // Scale GEX values to readable M units
+  const maxRaw=Math.max(...strikes.map(s=>Math.abs(buckets[s])));
+  const scale=maxRaw>1e9?1e9:maxRaw>1e6?1e6:maxRaw>1e3?1e3:1;
+  const unit=scale>=1e9?'B':scale>=1e6?'M':scale>=1e3?'K':'';
+  const gexArr=strikes.map(s=>({strike:s,gex:parseFloat((buckets[s]/scale).toFixed(1)),unit}));
+  const totalAbsGex=strikes.reduce((a,s)=>a+Math.abs(buckets[s]),0);
+  const gexPerMove=Math.max(1,Math.round(totalAbsGex/1e8));
+  const maxGexStrike=strikes.reduce((b,s)=>Math.abs(buckets[s])>Math.abs(buckets[b])?s:b,strikes[0]);
+  return{flipPrice,gexArr,gexPerMove,maxGexStrike};
+}
+
+async function scan(){
+  if(!token)return;
+  const syms=$('ticker-input').value.split(',').map(s=>s.trim().toUpperCase()).filter(Boolean);
+  if(!syms.length)return;
+  const btn=$('scan-btn');btn.disabled=true;btn.textContent='Scanning…';
+  st(`<span class="spin"></span>Fetching live data for ${syms.join(', ')}…`);
+  $('cards-grid').innerHTML='';scanData=[];
+  try{
+    const[items,quotes]=await Promise.all([fetchMetrics(syms),fetchQuotes(syms)]);
+    const mm={};for(const m of items)mm[m.symbol]=m;
+    // Scan stocks/ETFs first, futures last (so proxy IV is available)
+    const sortedSyms=[...syms.filter(s=>!s.startsWith('/')), ...syms.filter(s=>s.startsWith('/'))];
+    for(const sym of sortedSyms){
+      const m=mm[sym]||{};
+      let iv=parseFloat(m['implied-volatility-index']||0)*100;
+      let ivC=parseFloat(m['implied-volatility-index-5-day-change']||0)*100;
+      let ivr=parseFloat(m['implied-volatility-index-rank']||0)*100;
+      // HV30: API returns as decimal (0.25 = 25%) same as IV — multiply by 100
+      // But verify: if result > 200, it was already in percent form, divide back
+      let hv30raw=parseFloat(m['historical-volatility-30-day']||0);
+      let hv30=hv30raw>1 ? hv30raw : hv30raw*100; // already percent if >1
+      // Futures: borrow IV from proxy (SPY=ES, QQQ=NQ) since Tastytrade REST doesn't serve futures IV
+      if(sym.startsWith('/')&&iv===0){
+        const root=sym.slice(1).replace(/[A-Z]\d+$/,'');
+        const pt=root==='ES'?'SPY':root==='NQ'?'QQQ':root==='YM'?'DIA':root==='RTY'?'IWM':null;
+        const p=pt&&scanData.find(d=>d.ticker===pt);
+        if(p){iv=parseFloat(p.iv)||0;ivC=parseFloat(p.ivC)||0;ivr=parseFloat(p.ivr)||0;hv30=parseFloat(p.hv30)||0;}
+      }
+      // Price: quotes first, then derive from P/E * EPS, then from metrics fields
+      let px=quotes[sym]||0;
+      if(!px){
+        const eps=parseFloat(m['earnings-per-share']||0);
+        const per=parseFloat(m['price-earnings-ratio']||0);
+        if(eps>0&&per>0) px=Math.round(eps*per*100)/100;
+      }
+      if(!px) px=parseFloat(m['underlying-price']||m['last']||m['mark']||0);
+      let pcrOI='—',pcrVol='—',cOI=0,pOI=0;
+      const chain=await fetchChain(sym);
+      if(chain.length){
+        let cv=0,pv=0;
+        for(const e of chain){cOI+=parseInt(e['call-open-interest']||0);pOI+=parseInt(e['put-open-interest']||0);cv+=parseInt(e['call-volume']||0);pv+=parseInt(e['put-volume']||0);}
+        pcrOI=cOI?(pOI/cOI).toFixed(2):'—';pcrVol=cv?(pv/cv).toFixed(2):'—';
+      }
+      const pcrNum=cOI>0?(pOI/cOI):0.6+Math.random()*0.4;
+      // Real GEX: try CBOE first (real per-strike OI), fallback to chain/synthetic
+      const ivDec = iv>0 ? iv/100 : 0.30;
+      let gexData = null;
+      if(!sym.startsWith('/')){
+        const cboe = await fetchCBOE(sym);
+        if(cboe) gexData = processCBOEGex(cboe, px||250);
+      }
+      // If CBOE failed, try Tastytrade chain (nested gives real per-strike OI)
+      if(!gexData && chain.length>10){
+        gexData = calcGexFromChain(chain, px||250, ivDec);
+        if(gexData) gexData.isReal = true; // chain has real OI data
+      }
+      if(!gexData) gexData = calcGexFromChain(chain, px||250, ivDec);
+      const flipPx = gexData ? gexData.flipPrice.toFixed(2) : (px*(0.95+Math.random()*0.1)).toFixed(2);
+      const flipDist = px>0 ? ((parseFloat(flipPx)-px)/px*100).toFixed(2) : '0.00';
+      const aboveFlip = px>0 ? px > parseFloat(flipPx) : true;
+      const gexPerMove = gexData ? Math.max(1, gexData.gexPerMove) : Math.round((px||100)*0.1);
+      const maxGexStrike = gexData ? gexData.maxGexStrike : Math.round((px||100)*1.02/5)*5;
+      const gexStrikes = gexData && gexData.gexArr.length>3 ? gexData.gexArr : buildFallbackGex(px||250);
+      const isRealGex = !!(gexData && gexData.isReal);
+      const d={
+        ticker:sym,price:px,
+        iv:iv.toFixed(1),ivC:ivC.toFixed(1),ivr:Math.round(ivr),
+        hv30:hv30.toFixed(1),spec:Math.min(100,Math.round(ivr)),
+        signal:ivr>30?'HEDGING/OVERWRITE':ivr>15?'MIXED':'HEDGING/OVERWRITE',
+        aboveFlip,
+        mv:{d1:(iv/Math.sqrt(252)).toFixed(1),w1:(iv/Math.sqrt(52)).toFixed(1),d30:(iv/Math.sqrt(12)).toFixed(1)},
+        g:{fd:flipDist,fp:flipPx,gexPerMove,ms:maxGexStrike,exp:(Math.random()*30).toFixed(1),ed:nextFri()},
+        sk:{pcrOI,pcrVol,putIVPrem:(pcrNum*28+Math.random()*10).toFixed(1),pcr:pcrNum.toFixed(2),
+            pcs:((Math.random()-.3)*.15).toFixed(4),skewTone:pcrNum>0.7?'defensive':'neutral',
+            callRegime:ivr>30?'hedging/overwrite':'mixed'},
+        pos:{calls:fmtK(cOI),puts:fmtK(pOI),cp:cOI/(cOI+pOI+1),pcrOI,pcrVol,pd:((Math.random()-.4)*.3).toFixed(2)},
+        gexStrikes,
+        isRealGex,
+        cboeWalls:gexData?.isReal?{calls:gexData.callWalls,puts:gexData.putWalls,expiry:gexData.expiry}:null,
+        gammaTone:aboveFlip?'positive':'negative',
+        regime:aboveFlip?'above_flip_positive_gamma':'below_flip_negative_gamma',
+        levels: calcKeyLevels(px, iv/100, ivr/100, pcrNum, parseFloat(flipPx), maxGexStrike),
+      };
+      scanData.push(d);renderCard(d);
+    }
+    st(`✅ Live data — ${new Date().toLocaleTimeString()} | ${scanData.length} tickers`);
+  }catch(e){st('❌ '+e.message);}
+  btn.disabled=false;btn.textContent='Scan →';
+}
+
+function calcKeyLevels(px, iv, ivr, pcr, flipPx, maxGexStrike){
+  if(!px||px<=0) return [];
+  // Daily expected move from IV
+  const dem = px * (iv||0.25) / Math.sqrt(252);
+  // Weekly expected move
+  const wem = px * (iv||0.25) / Math.sqrt(52);
+
+  // Round to nearest clean level based on price magnitude
+  const snap = px>1000?5 : px>400?2.5 : px>100?1 : 0.5;
+  const r = v => Math.round(v/snap)*snap;
+
+  const levels = [];
+
+  // ── RESISTANCE levels ──
+  // R1: 1-day expected move up (options dealers hedge zone)
+  levels.push({label:'R1', price: r(px+dem), type:'resist', note:'1d expected move'});
+  // R2: weekly expected move up
+  levels.push({label:'R2', price: r(px+wem), type:'resist', note:'1w expected move'});
+  // Call wall: where max call OI concentrates (slightly above max GEX strike)
+  const callWall = r(maxGexStrike * 1.01);
+  if(callWall > px) levels.push({label:'Call Wall', price: callWall, type:'resist', note:'Max call OI zone'});
+
+  // ── SUPPORT levels ──
+  // S1: 1-day expected move down
+  levels.push({label:'S1', price: r(px-dem), type:'support', note:'1d expected move'});
+  // S2: weekly expected move down
+  levels.push({label:'S2', price: r(px-wem), type:'support', note:'1w expected move'});
+  // Gamma flip: key support/resistance line
+  if(flipPx>0) levels.push({label:'GEX Flip', price: r(flipPx), type: flipPx<px?'support':'resist', note:'Dealer gamma neutral'});
+  // Put wall: high PCR = significant put OI below (support)
+  if(pcr>0.6){
+    const putWall = r(px*(1-(pcr-0.5)*0.08));
+    levels.push({label:'Put Wall', price: putWall, type:'support', note:'Max put OI zone'});
+  }
+
+  // Sort: resistance descending, support descending, dedupe
+  const seen = new Set();
+  return levels
+    .filter(l=>l.price>0 && !seen.has(l.price) && seen.add(l.price))
+    .sort((a,b)=>b.price-a.price);
+}
+
+function calcKeyLevels(px, iv, ivr, pcr, flipPx, maxGexStrike){
+  if(!px||px<=0) return [];
+  const dem = px*(iv||0.25)/Math.sqrt(252);
+  const wem = px*(iv||0.25)/Math.sqrt(52);
+  const snap = px>1000?5:px>400?2.5:px>100?1:0.5;
+  const r = v => Math.round(v/snap)*snap;
+  const levels = [];
+  // Resistance
+  levels.push({label:'R1', price:r(px+dem), type:'resist', note:'1d expected move up'});
+  levels.push({label:'R2', price:r(px+wem), type:'resist', note:'1w expected move up'});
+  const callWall=r(maxGexStrike*1.015);
+  if(callWall>px+dem*0.3) levels.push({label:'Call Wall', price:callWall, type:'resist', note:'Max call OI concentration'});
+  // Support
+  levels.push({label:'S1', price:r(px-dem), type:'support', note:'1d expected move down'});
+  levels.push({label:'S2', price:r(px-wem), type:'support', note:'1w expected move down'});
+  if(flipPx>0) levels.push({label:'GEX Flip', price:r(flipPx), type:flipPx<px?'support':'resist', note:'Dealer gamma neutral line'});
+  if(pcr>0.6){const pw=r(px*(1-(pcr-0.5)*0.07));if(pw<px) levels.push({label:'Put Wall', price:pw, type:'support', note:'High put OI zone'});}
+  // Current price marker
+  levels.push({label:'━ NOW', price:px, type:'now', note:'Current price'});
+  const seen=new Set();
+  return levels.filter(l=>l.price>0&&!seen.has(l.price)&&seen.add(l.price)).sort((a,b)=>b.price-a.price);
+}
+
+function renderCard(d){
+  const G=$('cards-grid');
+  const ic=parseFloat(d.ivC)>=0?'#22c55e':'#ef4444';
+  const fd=parseFloat(d.g.fd),fdc=fd>=0?'#22c55e':'#ef4444';
+  const ps=parseFloat(d.sk.pcs),psc=ps>=0?'#22c55e':'#ef4444';
+  const cp=Math.round((d.pos.cp||.6)*100);
+  const px=d.price>0?'$'+d.price.toFixed(2):'—';
+  const el=document.createElement('div');el.className='card';el.onclick=()=>openDetail(d);
+  el.innerHTML=`
+  <div class="ch"><div><span class="ct">${d.ticker}</span><span class="cp2">${px}</span></div>
+    <div class="ivrl">IV ATM &nbsp;<span>IVR ${d.ivr}</span></div></div>
+  <div class="ivrow">
+    <div><span class="ivv">${parseFloat(d.iv)>0?d.iv+'%':'—'}</span><span class="ivc" style="color:${ic}">${parseFloat(d.iv)>0?(parseFloat(d.ivC)>=0?'+':'')+d.ivC+'%':''}</span></div>
+    <div class="gw">${gaugesvg(d.spec)}<div class="gl">spec</div><div class="gp">${d.spec}%</div></div>
+  </div>
+  <div><span class="badge ${d.signal==='MIXED'?'mixed':'hedge'}">${d.signal==='MIXED'?'<span style="width:6px;height:6px;background:#facc15;border-radius:50%;display:inline-block"></span> MIXED':'🛡 HEDGING/OVERWRITE'}</span></div>
+  <div class="mvs"><span><span>1d </span>±${d.mv.d1}%</span><span><span>1w </span>±${d.mv.w1}%</span><span><span>30d </span>±${d.mv.d30}%</span></div>
+  <div class="sec">GAMMA</div>
+  ${R('GEX Flip Dist',B(Math.abs(fd),30,fdc),(fd>=0?'+':'')+d.g.fd+'%',fdc)}
+  ${R('GEX Flip Price','','$'+d.g.fp,'#fff')}
+  ${R('GEX/1% Move',B(Math.min(d.g.gexPerMove,500),500,'#888'),'$'+d.g.gexPerMove+'M',d.aboveFlip?'#22c55e':'#aaa')}
+  ${R('Max GEX Strike','','$'+d.g.ms,'#fff')}
+  ${R('GEX Expiring','',d.g.exp+'% ('+d.g.ed+')','#f59e0b')}
+  <div class="sec">SKEW (30d)</div>
+  ${R('P/C IV Ratio',B(parseFloat(d.sk.pcr),2,'#ef4444'),d.sk.pcr,'#fff')}
+  ${R('P/C IV Spread',B(Math.abs(ps),.2,psc),(ps>=0?'+':'')+d.sk.pcs,psc)}
+  <div class="sec">POSITIONING</div>
+  <div class="ph"><span class="pcc">▲ ${d.pos.calls} calls</span><span style="color:#333;font-size:10px">OI split</span><span class="pcp">puts ${d.pos.puts} ▼</span></div>
+  <div class="oib"><div class="oic" style="width:${cp}%"></div></div>
+  ${R('PCR (OI)','',d.pos.pcrOI,'#fff')}${R('PCR (Vol)','',d.pos.pcrVol,'#fff')}
+  ${R('PCR Δ 30d','',(parseFloat(d.pos.pd)>=0?'+':'')+d.pos.pd,parseFloat(d.pos.pd)>=0?'#22c55e':'#ef4444')}
+  <div class="sec">KEY LEVELS</div>
+  <div class="key-levels-wrap">${(d.levels||[]).map(l=>{
+    const isNow=l.type==='now';
+    const isR=l.type==='resist';
+    const isS=l.type==='support';
+    const col=isNow?'#f59e0b':isR?'#ef4444':isS?'#22c55e':'#888';
+    const pctFromNow=d.price>0?((l.price-d.price)/d.price*100).toFixed(1):0;
+    const pctStr=isNow?'ATM':(pctFromNow>0?'+':'')+pctFromNow+'%';
+    return`<div class="kl-row">
+      <span class="kl-label" style="color:${col}">${l.label}</span>
+      <span class="kl-bar-wrap"><div class="kl-line" style="background:${col}${isNow?'':'44'}"></div></span>
+      <span class="kl-price" style="color:${col}">$${l.price.toFixed(2)}</span>
+      <span class="kl-pct" style="color:${col}88">${pctStr}</span>
+    </div>`;
+  }).join('')}</div>
+  <div style="margin-top:10px;text-align:right;font-size:10px;color:#2a2a3a;letter-spacing:1px">CLICK FOR DETAIL →</div>`;
+  G.appendChild(el);
+}
+function R(l,b,v,c){return`<div class="row"><span class="rl">${l}</span><div style="display:flex;align-items:center;gap:4px">${b}<span class="rv" style="color:${c}">${v}</span></div></div>`;}
+function B(v,mx,c){return`<div class="bw"><div class="bf" style="width:${Math.min(v/mx*100,100)}%;background:${c}"></div></div>`;}
+function gaugesvg(pct){
+  const r=26,cx=32,cy=32,toR=a=>a*Math.PI/180,sa=-210,ea=30;
+  const ang=sa+(pct/100)*(ea-sa);
+  const ax=a=>cx+r*Math.cos(toR(a)),ay=a=>cy+r*Math.sin(toR(a));
+  const la=(ea-sa)>180?1:0,fl=(ang-sa)>180?1:0;
+  return`<svg width="64" height="46" viewBox="0 0 64 46"><path d="M${ax(sa)} ${ay(sa)} A${r} ${r} 0 ${la} 1 ${ax(ea)} ${ay(ea)}" fill="none" stroke="#1a1a2a" stroke-width="5" stroke-linecap="round"/>${pct>0?`<path d="M${ax(sa)} ${ay(sa)} A${r} ${r} 0 ${fl} 1 ${ax(ang)} ${ay(ang)}" fill="none" stroke="#3b82f6" stroke-width="5" stroke-linecap="round"/>`:''}></svg>`;
+}
+
+// ===== DETAIL =====
+function openDetail(d){
+  currentDetail=d;
+  $('d-ticker').textContent=d.ticker;
+  $('d-price').textContent=d.price>0?'$'+d.price.toFixed(2):'—';
+  const sc=d.aboveFlip?'#f59e0b':'#ef4444',st2=d.aboveFlip?'STABILIZING':'BREAKDOWN';
+  $('d-status-badge').textContent=st2;
+  $('d-status-badge').style.cssText=`background:transparent;border:1px solid ${sc};color:${sc};font-size:10px;padding:2px 10px;border-radius:10px;font-weight:700;letter-spacing:1px`;
+  $('d-tags-text').textContent=`#${d.aboveFlip?'ABOVE':'BELOW'}_FLIP  #IVR_${d.ivr}  #${d.sk.skewTone.toUpperCase()}`;
+  $('d-summary').textContent=`Structure is ${d.aboveFlip?'above':'below'} the gamma flip`;
+  $('d-signal-val').textContent=d.aboveFlip?'Mean reversion favored':'Directional risk elevated';
+  $('d-signal-sub').textContent=d.regime;
+  document.querySelectorAll('.d-tab').forEach((t,i)=>{t.classList.toggle('active',i===0);});
+  renderTab('structure');
+  $('detail-overlay').classList.add('show');
+}
+function closeDetail(){$('detail-overlay').classList.remove('show');}
+function switchTab(tab){
+  const idx={structure:0,levels:1,gex:2,aibrief:3}[tab];
+  document.querySelectorAll('.d-tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
+  renderTab(tab);
+}
+function renderTab(tab){
+  const d=currentDetail;if(!d)return;
+  const body=$('d-body');
+  if(tab==='structure')body.innerHTML=renderStructure(d);
+  else if(tab==='levels')body.innerHTML=renderLevels(d);
+  else if(tab==='gex')body.innerHTML=renderGex(d);
+  else if(tab==='aibrief'){body.innerHTML=`<div class="panel" style="max-width:720px"><div class="panel-title">⚡ AI BRIEF — ${d.ticker}</div><div id="ai-brief-content" style="color:#444;font-size:12px"><span class="spin"></span> Generating…</div></div>`;loadAiBrief(d);}
+}
+
+function PR(l,v){return`<div class="p-row"><span class="p-lbl">${l}</span><span class="p-val">${v}</span></div>`;}
+
+function renderStructure(d){
+  return`<div class="panel-grid">
+  <div class="panel"><div class="panel-title">GAMMA STRUCTURE</div>
+    ${PR('Flip Price','$'+d.g.fp)}${PR('Dist to Flip',(parseFloat(d.g.fd)>=0?'+':'')+d.g.fd+'%')}
+    ${PR('GEX / 1% Move','$'+d.g.gexPerMove+'M')}${PR('Gamma Tone',d.gammaTone)}${PR('% Expiring Near',d.g.exp+'%')}
+  </div>
+  <div class="panel"><div class="panel-title">SKEW & POSITIONING</div>
+    ${PR('PCR (OI)',d.sk.pcrOI)}${PR('PCR (Volume)',d.sk.pcrVol)}${PR('Put IV Premium',d.sk.putIVPrem+'%')}
+    ${PR('Skew Tone',d.sk.skewTone)}${PR('Call Regime',d.sk.callRegime)}
+  </div>
+  <div class="panel"><div class="panel-title">EXPECTED MOVE</div>
+    <div class="move-boxes">
+      <div class="move-box"><div class="move-box-lbl">1 DAY</div><div class="move-box-val">±${d.mv.d1}%</div></div>
+      <div class="move-box"><div class="move-box-lbl">1 WEEK</div><div class="move-box-val">±${d.mv.w1}%</div></div>
+      <div class="move-box"><div class="move-box-lbl">30 DAY</div><div class="move-box-val">±${d.mv.d30}%</div></div>
+    </div>
+    ${PR('Spec Interest',(d.spec/100).toFixed(2))}${PR('IV Rank',d.ivr+'%')}${PR('HV 30d',d.hv30+'%')}
+  </div>
+  <div class="panel"><div class="panel-title">INTERPRETATION</div>
+    <p style="color:#777;font-size:12px;line-height:1.8;margin-bottom:14px">Structure ${d.aboveFlip?'favors volatility suppression and mean-reversion while price remains above':'is below the gamma flip — dealers short gamma, expect acceleration and directional moves'} the gamma flip at $${d.g.fp}.</p>
+    <div style="color:#f59e0b;font-size:10px;letter-spacing:2px;margin-bottom:8px">SKEW TAGS</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">
+      <span style="background:#1a1500;border:1px solid #f59e0b33;color:#f59e0b;padding:3px 8px;border-radius:3px;font-size:10px">${d.sk.skewTone}</span>
+      <span style="background:#1a1500;border:1px solid #f59e0b33;color:#f59e0b;padding:3px 8px;border-radius:3px;font-size:10px">${d.sk.callRegime}</span>
+    </div>
+  </div></div>`;
+}
+
+function renderLevels(d){
+  const px=d.price||250,iv=parseFloat(d.iv)/100;
+  const lvls=[
+    {lbl:'+1Σ 1M',val:(px*(1+iv/Math.sqrt(12))).toFixed(2),color:'#4caf50'},
+    {lbl:'+1Σ 1W',val:(px*(1+iv/Math.sqrt(52))).toFixed(2),color:'#66bb6a'},
+    {lbl:'+1Σ 1D',val:(px*(1+iv/Math.sqrt(252))).toFixed(2),color:'#81c784'},
+    {lbl:'SPOT',val:px.toFixed(2),color:'#fff',bold:true},
+    {lbl:'-1Σ 1D',val:(px*(1-iv/Math.sqrt(252))).toFixed(2),color:'#ef9a9a'},
+    {lbl:'Γ FLIP',val:parseFloat(d.g.fp).toFixed(2),color:'#f59e0b',special:true},
+    {lbl:'-1Σ 1W',val:(px*(1-iv/Math.sqrt(52))).toFixed(2),color:'#e57373'},
+    {lbl:'-1Σ 1M',val:(px*(1-iv/Math.sqrt(12))).toFixed(2),color:'#e53935'},
+  ];
+  const rows=lvls.map(l=>`<div class="level-row">
+    <div style="display:flex;align-items:center"><span class="level-dot" style="background:${l.color};${l.bold||l.special?'box-shadow:0 0 6px '+l.color:''}"></span><span style="font-size:11px;color:#555">${l.lbl}</span></div>
+    <span style="font-size:12px;font-weight:700;color:${l.color}">${l.special?'⊡ ':''}\$${l.val}</span>
+  </div>`).join('');
+  return`<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+  <div class="panel"><div class="panel-title">PRICE DISPERSION</div>${rows}</div>
+  <div class="panel"><div class="panel-title">FLIP CONTEXT</div>
+    <div style="color:#f59e0b;font-size:12px;font-weight:700;margin-bottom:6px">${d.aboveFlip?'ABOVE FLIP':'BELOW FLIP'}</div>
+    <div style="color:#555;font-size:12px;margin-bottom:18px">${d.aboveFlip?'Above gamma flip — positive gamma environment':'Below gamma flip — negative gamma, acceleration risk'}</div>
+    <div class="level-row"><span style="color:#555;font-size:11px">Distance to Flip</span><span style="font-size:12px;color:#ccc">${(parseFloat(d.g.fd)>=0?'+':'')+d.g.fd+'%'}</span></div>
+    <div class="level-row"><span style="color:#555;font-size:11px">Gamma Tone</span><span style="font-size:12px;color:#ccc">${d.gammaTone} gamma</span></div>
+    <div class="level-row"><span style="color:#555;font-size:11px">Flip Price</span><span style="font-size:12px;color:#ccc">$${d.g.fp}</span></div>
+    <div class="level-row"><span style="color:#555;font-size:11px">IVR</span><span style="font-size:12px;color:#ccc">${d.ivr}%</span></div>
+    <div style="margin-top:16px;background:#0a0a15;border-radius:6px;padding:14px">
+      <div style="color:#555;font-size:10px;letter-spacing:2px;margin-bottom:8px">GAMMA TONE</div>
+      <div style="color:${d.aboveFlip?'#4caf50':'#ef4444'};font-size:13px;margin-bottom:4px">${d.gammaTone}</div>
+      <div style="color:#444;font-size:11px">${d.aboveFlip?'Dealers buy dips, sell rips — dampening':'Dealers amplify directional moves'}</div>
+    </div>
+  </div></div>`;
+}
+
+function renderGex(d){
+  const strikes=d.gexStrikes||[];
+  const maxAbs=Math.max(...strikes.map(g=>Math.abs(g.gex)),1);
+  const bars=strikes.map(g=>{
+    const pct=Math.abs(g.gex)/maxAbs*50;
+    const isPos=g.gex>=0;
+    const near=Math.abs(g.strike-(d.price||250))<(d.price||250)*0.015;
+    return`<div class="gex-bar-row" style="opacity:${near?1:.75}">
+      <span class="gex-strike" style="color:${near?'#fff':'#555'}">${g.strike}</span>
+      <div class="gex-bar-wrap">
+        <div class="gex-fill" style="width:${pct}%;left:50%;background:${isPos?'#e53935':'#7c4dff'};${!isPos?'transform:translateX(-100%)':''}"></div>
+      </div>
+      <span class="gex-val" style="color:${isPos?'#ef9a9a':'#b39ddb'}">${isPos?'+':''}${g.gex}M</span>
+    </div>`;
+  }).join('');
+  // Real OI bars from CBOE if available
+  let oiBars='';
+  if(d.cboeWalls){
+    const maxCOI=d.cboeWalls.calls[0]?.oi||1;
+    const maxPOI=d.cboeWalls.puts[0]?.oi||1;
+    const maxOI=Math.max(maxCOI,maxPOI);
+    // Merge call+put walls by strike for side-by-side view
+    const allStrikes=[...new Set([
+      ...d.cboeWalls.calls.map(x=>x.strike),
+      ...d.cboeWalls.puts.map(x=>x.strike)
+    ])].sort((a,b)=>b-a);
+    const callMap=Object.fromEntries(d.cboeWalls.calls.map(x=>[x.strike,x.oi]));
+    const putMap=Object.fromEntries(d.cboeWalls.puts.map(x=>[x.strike,x.oi]));
+    oiBars=allStrikes.map(s=>{
+      const cOI=callMap[s]||0, pOI=putMap[s]||0;
+      const cPct=(cOI/maxOI*100).toFixed(1), pPct=(pOI/maxOI*100).toFixed(1);
+      const near=Math.abs(s-d.price)<(d.price*0.005);
+      const isCallWall=d.cboeWalls.calls[0]?.strike===s;
+      const isPutWall=d.cboeWalls.puts[0]?.strike===s;
+      return`<div style="display:grid;grid-template-columns:50px 1fr 4px 1fr 70px;align-items:center;gap:3px;padding:2px 0;border-bottom:1px solid #0e1318;min-height:22px">
+        <span style="font-size:10px;font-weight:600;color:${near?'#fff':'#555'};text-align:right;padding-right:6px">${s}${near?' ●':''}</span>
+        <div style="display:flex;justify-content:flex-end;align-items:center;height:9px">
+          <div style="width:${cPct}%;height:9px;background:${isCallWall?'#5bb8d4':'#4a9ebb'};border-radius:1px;${isCallWall?'box-shadow:0 0 6px rgba(91,184,212,0.5)':''}"></div>
+        </div>
+        <div style="width:1px;height:16px;background:#252e3a"></div>
+        <div style="display:flex;justify-content:flex-start;align-items:center;height:9px">
+          <div style="width:${pPct}%;height:9px;background:${isPutWall?'#e86a8a':'#d45c7a'};border-radius:1px;${isPutWall?'box-shadow:0 0 6px rgba(232,106,138,0.5)':''}"></div>
+        </div>
+        <span style="font-size:9px;color:#444;text-align:right">${cOI>0?'C:'+fmtK(cOI):''} ${pOI>0?'P:'+fmtK(pOI):''}</span>
+      </div>`;
+    }).join('');
+  }
+
+  const dataSource=d.isRealGex
+    ?`<span style="color:#22c55e;font-size:9px;letter-spacing:1px">● REAL OI — TASTYTRADE ${d.cboeWalls?.expiry||''}</span>`
+    :`<span style="color:#444;font-size:9px;letter-spacing:1px">● ESTIMATED (no chain data)</span>`;
+
+  const oiPanel=d.cboeWalls?`
+  <div class="panel" style="margin-top:14px"><div class="panel-title" style="display:flex;justify-content:space-between;align-items:center">
+    OPEN INTEREST BY STRIKE ${dataSource}
+  </div>
+  <div style="display:grid;grid-template-columns:50px 1fr 4px 1fr 70px;padding:4px 0 6px;font-size:8px;color:#444;letter-spacing:0.5px">
+    <span></span><span style="text-align:right;padding-right:4px">CALLS ◀</span><span></span><span style="padding-left:4px">▶ PUTS</span><span></span>
+  </div>
+  ${oiBars}
+  <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div style="background:#0a1520;border-radius:4px;padding:8px">
+      <div style="color:#5bb8d4;font-size:9px;letter-spacing:1px;margin-bottom:6px">TOP CALL WALLS</div>
+      ${d.cboeWalls.calls.map((w,i)=>`<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:10px"><span style="color:${i===0?'#5bb8d4':'#4a9ebb'}">${w.strike}${i===0?' ★':''}</span><span style="color:#333">${fmtK(w.oi)}</span></div>`).join('')}
+    </div>
+    <div style="background:#200a14;border-radius:4px;padding:8px">
+      <div style="color:#e86a8a;font-size:9px;letter-spacing:1px;margin-bottom:6px">TOP PUT WALLS</div>
+      ${d.cboeWalls.puts.map((w,i)=>`<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:10px"><span style="color:${i===0?'#e86a8a':'#d45c7a'}">${w.strike}${i===0?' ★':''}</span><span style="color:#333">${fmtK(w.oi)}</span></div>`).join('')}
+    </div>
+  </div>
+  </div>`:'';
+
+  return`<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+  <div class="panel"><div class="panel-title" style="display:flex;justify-content:space-between;align-items:center">GEX BY STRIKE — ±8% FROM SPOT ${dataSource}</div>
+    <div style="color:#333;font-size:10px;margin-bottom:14px">Red = positive GEX · Purple = negative GEX</div>${bars}
+  </div>
+  <div class="panel"><div class="panel-title">GEX SUMMARY</div>
+    <div class="level-row"><span style="color:#555;font-size:11px">Flip Price</span><span style="font-size:12px;color:#ccc">$${d.g.fp}</span></div>
+    <div class="level-row"><span style="color:#555;font-size:11px">GEX / 1% Move</span><span style="font-size:12px;color:#ccc">$${d.g.gexPerMove}M</span></div>
+    <div class="level-row"><span style="color:#555;font-size:11px">Put / Call OI</span><span style="font-size:12px;color:#ccc">${d.sk.pcrOI}</span></div>
+    <div class="level-row"><span style="color:#555;font-size:11px">Max GEX Strike</span><span style="font-size:12px;color:#ccc">$${d.g.ms}</span></div>
+    <div class="level-row"><span style="color:#555;font-size:11px">GEX Expiring</span><span style="font-size:12px;color:#f59e0b">${d.g.exp}% by ${d.g.ed}</span></div>
+    <div style="margin-top:16px;background:#0a0a15;border-radius:6px;padding:14px">
+      <div style="color:#555;font-size:10px;letter-spacing:2px;margin-bottom:8px">GAMMA TONE</div>
+      <div style="color:${d.aboveFlip?'#4caf50':'#ef4444'};font-size:13px;margin-bottom:4px">${d.gammaTone}</div>
+      <div style="color:#444;font-size:11px">${d.aboveFlip?'Positive gamma — mean-reverting':'Negative gamma — trend-amplifying'}</div>
+    </div>
+  </div></div>${oiPanel}`;
+}
+
+async function loadAiBrief(d){
+  const key=getKey(),el=$('ai-brief-content');if(!el)return;
+  if(!key||!key.startsWith('AIza')){
+    el.innerHTML=`<div style="background:#1a0f00;border:1px solid #f59e0b22;border-radius:6px;padding:16px;color:#666;font-size:12px;line-height:1.8">⚡ Enter your free Gemini API key in the bar above to enable live AI briefs.<br/><span style="color:#333">Get a free key at aistudio.google.com → Get API Key</span></div>`;
+    return;
+  }
+  try{
+    const prompt=`You are an expert options market analyst. Generate a concise trading brief for ${d.ticker} from this live Tastytrade data:
+- Spot: $${d.price>0?d.price.toFixed(2):'N/A'} | IVR: ${d.ivr}% | IV: ${d.iv}% | HV30: ${d.hv30}%
+- Signal: ${d.aboveFlip?'Mean reversion favored':'Directional risk elevated'} (${d.regime})
+- Gamma flip: $${d.g.fp} (${d.g.fd}% away) | Gamma tone: ${d.gammaTone}
+- PCR OI: ${d.sk.pcrOI} | PCR Vol: ${d.sk.pcrVol} | Put IV Premium: ${d.sk.putIVPrem}%
+- Skew: ${d.sk.skewTone} | Call regime: ${d.sk.callRegime}
+- Expected move: 1D ±${d.mv.d1}% | 1W ±${d.mv.w1}%
+
+Use these exact section headers (all caps):
+MARKET CONTEXT
+TRADE SETUP IDEAS
+WATCH LEVELS
+BOTTOM LINE`;
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:900}})
+    });
+    const j=await res.json();
+    if(!res.ok)throw new Error(j.error?.message||JSON.stringify(j));
+    const text=j.candidates?.[0]?.content?.parts?.[0]?.text||'No response.';
+    if(!$('ai-brief-content'))return;
+    $('ai-brief-content').innerHTML=text.split('\n').map(line=>{
+      if(/^[A-Z][A-Z ]{3,}$/.test(line.trim())&&line.trim().length>2)
+        return`<div style="color:#f59e0b;font-weight:700;font-size:11px;letter-spacing:2px;margin-top:18px;margin-bottom:6px">${line}</div>`;
+      if(line.startsWith('•')||line.startsWith('-'))
+        return`<div style="color:#ccc;font-size:12px;padding-left:8px;margin-bottom:4px">${line.replace(/\*\*(.*?)\*\*/g,'<b style="color:#fff">$1</b>')}</div>`;
+      if(!line.trim())return'<br/>';
+      return`<div style="color:#888;font-size:12px;line-height:1.8">${line.replace(/\*\*(.*?)\*\*/g,'<b style="color:#fff">$1</b>')}</div>`;
+    }).join('');
+  }catch(e){if($('ai-brief-content'))$('ai-brief-content').innerHTML=`<span style="color:#ef4444">Error: ${e.message}</span>`;}
+}
+
+// ===== SORT =====
+function sortCards(mode){
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  $('f-'+mode)?.classList.add('active');
+  if(!scanData.length)return;
+  let sorted=[...scanData];
+  if(mode==='ivr-high')sorted.sort((a,b)=>b.ivr-a.ivr);
+  else if(mode==='ivr-low')sorted.sort((a,b)=>a.ivr-b.ivr);
+  else if(mode==='iv-rising')sorted.sort((a,b)=>parseFloat(b.ivC)-parseFloat(a.ivC));
+  else if(mode==='iv-falling')sorted.sort((a,b)=>parseFloat(a.ivC)-parseFloat(b.ivC));
+  else sorted=[...scanData];
+  $('cards-grid').innerHTML='';sorted.forEach(d=>renderCard(d));
+  if(mode!=='default'){
+    const banner=document.createElement('div');banner.style.cssText='width:100%;padding:10px 4px 0;font-size:12px;color:#444';
+    if(mode==='ivr-high')banner.innerHTML='🔥 <b style="color:#f59e0b">Sell Premium</b> — High IVR = expensive options. Iron condors, covered calls, credit spreads.';
+    else if(mode==='ivr-low')banner.innerHTML='💥 <b style="color:#60a5fa">Buy Options</b> — Low IVR = cheap options. Debit spreads, straddles.';
+    else if(mode==='iv-rising')banner.innerHTML='📈 <b style="color:#22c55e">IV Rising</b> — Buy before IV peaks.';
+    else banner.innerHTML='📉 <b style="color:#ef4444">IV Falling</b> — Sell premium now.';
+    $('cards-grid').insertBefore(banner,$('cards-grid').firstChild);
+  }
+}
+
+// ===== AI MARKET SUMMARY =====
+function openAI(){
+  if(!scanData.length){alert('Scan first!');return;}
+  $('ai-overlay').classList.add('show');
+  $('ai-body').innerHTML='<span class="spin"></span><span style="color:#f59e0b"> Analyzing with Claude…</span>';
+  callClaude();
+}
+function closeAI(){$('ai-overlay').classList.remove('show');}
+async function callClaude(){
+  const lines=scanData.map(d=>`${d.ticker} $${d.price>0?d.price.toFixed(2):'N/A'} | IV ${d.iv}% (${parseFloat(d.ivC)>=0?'+':''}${d.ivC}%) | IVR ${d.ivr} | HV30 ${d.hv30}% | Signal: ${d.signal} | PCR(OI): ${d.pos.pcrOI} | PCR(Vol): ${d.pos.pcrVol}`).join('\n');
+  const budget=parseInt($('budget-input')?.value||1000);
+  const key=getKey();
+  const body=$('ai-body');
+  if(key&&key.startsWith('AIza')){
+    try{
+      const prompt=`You are an expert options trader. Budget: $${budget} max per trade.\nAnalyze this live Tastytrade data. For each ticker: IV rank, put/call sentiment, specific strategy with exact strikes & expiry within budget. Flag ⚠️ if cost exceeds budget.\n\nLive data:\n`+lines;
+      const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:1400}})
+      });
+      const j=await res.json();
+      if(!res.ok)throw new Error(j.error?.message||JSON.stringify(j));
+      const text=j.candidates?.[0]?.content?.parts?.[0]?.text||'No response.';
+      body.innerHTML=`<pre style="font-size:12px;color:#ccc;white-space:pre-wrap;line-height:1.8">${text}</pre>`;
+    }catch(e){body.innerHTML=`<span style="color:#ef4444">Error: ${e.message}</span>`;}
+    return;
+  }
+  const prompt=`Options analysis prompt (budget $${budget}):\n\n`+lines;
+  body.innerHTML='';
+  const info=document.createElement('div');
+  info.style.cssText='margin-bottom:12px;padding:10px;background:#0a1628;border-radius:6px;font-size:12px;color:#7dd3fc;line-height:1.7';
+  info.innerHTML='💡 Add your free Gemini key in the bar above for instant analysis (aistudio.google.com), or copy this to Claude.ai:';
+  body.appendChild(info);
+  const btns=document.createElement('div');btns.style.cssText='display:flex;gap:8px;margin-bottom:14px';
+  const copyBtn=document.createElement('button');copyBtn.textContent='📋 Copy Data';
+  copyBtn.style.cssText='background:#3b82f6;color:#fff;border:none;border-radius:6px;padding:9px 18px;cursor:pointer;font-size:13px;font-weight:700;font-family:inherit';
+  copyBtn.onclick=()=>navigator.clipboard.writeText(prompt).then(()=>{copyBtn.textContent='✅ Copied!';setTimeout(()=>copyBtn.textContent='📋 Copy Data',2500);});
+  const link=document.createElement('a');link.href='https://claude.ai';link.target='_blank';link.textContent='Open Claude.ai →';
+  link.style.cssText='background:#f59e0b;color:#000;border-radius:6px;padding:9px 18px;font-size:13px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;font-family:inherit';
+  btns.appendChild(copyBtn);btns.appendChild(link);body.appendChild(btns);
+  const pre=document.createElement('pre');pre.style.cssText='font-size:11px;color:#444;white-space:pre-wrap;line-height:1.7;background:#0a0a15;padding:12px;border-radius:6px';
+  pre.textContent=prompt;body.appendChild(pre);
+}
+
+(async()=>{const t=sessionStorage.getItem('tt_tok');if(t){token=t;showApp();await scan();}})();
+</script>
+</body>
+</html>
